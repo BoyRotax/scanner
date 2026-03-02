@@ -2,113 +2,55 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Rotax Asia</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* จัด Layout ให้สวยงามและ Responsive */
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            background: #000; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-        }
-        .login-card { 
-            background: #111; 
-            padding: 40px; 
-            border-radius: 20px; 
-            border: 1px solid #333; 
-            text-align: center; 
-            width: 500px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        h1 { color: #e30613; margin-bottom: 5px; letter-spacing: 2px; }
-        .sub-text { font-size: 0.9rem; color: #888; margin-bottom: 20px; }
-        .brand-footer { font-size: 0.7rem; color: #e30613; margin-bottom: 25px; font-weight: bold; }
-        
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 10px; 
-            border: 1px solid #333; 
-            background: #1a1a1a; 
-            color: white; 
-            box-sizing: border-box; 
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            transition: 0.3s;
-        }
-        input:focus { border-color: #e30613; box-shadow: 0 0 5px rgba(227, 6, 19, 0.5); }
-        
-        button { 
-            width: 100%; 
-            padding: 14px; 
-            margin-top: 10px;
-            border-radius: 10px; 
-            border: none; 
-            background: #e30613; 
-            color: white; 
-            font-weight: bold; 
-            font-size: 1rem;
-            cursor: pointer; 
-            transition: 0.2s;
-        }
-        button:hover { background: #ff071a; transform: translateY(-2px); }
-        button:active { transform: translateY(0); }
+        body { font-family: 'Kanit', sans-serif; background: #000; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .login-card { background: #111; padding: 40px; border-radius: 20px; border: 1px solid #333; text-align: center; width: 300px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; text-align: center; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #e30613; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #b3050f; }
     </style>
 </head>
 <body>
-
     <div class="login-card">
-        <h1 style="font-size: 4rem;color:#e30613">ROTAX-ASIA&trade;</h1>
-        <p style="font-size: 2rem; color: #888;">Technical Inspection System</p>
-        <p style="font-size: 1rem; color:#e30613;">MOMENTS MEDIA ORGANIZING &copy;Copyright</p>
+        <h1 style="color:#e30613">ROTAX ASIA</h1>
+        <p style="font-size: 1rem; color: #888;">Technical Inspection System</p>
+        <p style="font-size: .8rem; color:#e30613;">MOMENTS MEDIA ORGANIZING</p>
         
-        <input type="password" id="pw" placeholder="กรอกรหัสผ่าน" autofocus>
-        <button onclick="handleLogin()">LOGIN</button>
+        <input type="password" id="pw" placeholder="Password">
+        <button onclick="login()">LOGIN</button>
     </div>
 
     <script>
-        /**
-         * ระบบเข้ารหัสแบบ Simple Hash (Base64 + Reverse) 
-         * เพื่อซ่อนรหัสจริงจาก View Source บน GitHub
-         */
-        const securityLayer = {
-            encode: (str) => btoa(str).split('').reverse().join(''),
-            // ค่าที่เข้ารหัสของ 'rotax2026'
-            target: "NjIwMnhhdG9y" 
-        };
+        // ฟังก์ชันช่วยเข้ารหัส (Base64 แบบย้อนกลับ) เพื่อซ่อนรหัสจริง
+        function checkPass(input) {
+            return btoa(input).split('').reverse().join('');
+        }
 
-        function handleLogin() {
-            const inputField = document.getElementById('pw');
-            const userPass = inputField.value;
+        function login() {
+            const passInput = document.getElementById('pw').value;
+            
+            // นี่คือค่าที่เข้ารหัสของ 'rotax2026'
+            const secretHash = "NjIwMnhhdG9y";
 
-            if (securityLayer.encode(userPass) === securityLayer.target) {
-                // เก็บสถานะการเข้าสู่ระบบไว้ใน Session (จะหายไปเมื่อปิด Browser)
+            if (checkPass(passInput) === secretHash) {
+                // เก็บสถานะว่าล็อกอินแล้ว
                 sessionStorage.setItem('isLoggedIn', 'true');
-                
-                // ไปยังหน้าถัดไป (ตรวจสอบให้แน่ใจว่าไฟล์ชื่อ scanner.html ตัวเล็กทั้งหมด)
+                // ย้ายไปหน้าสแกนเนอร์ (ย้ำ: ไฟล์ต้องชื่อ scanner.html ตัวเล็กหมดนะครับ)
                 window.location.href = 'scanner.html';
             } else {
-                alert('รหัสผ่านไม่ถูกต้อง หรือตรวจสอบภาษาคีย์บอร์ดของคุณ');
-                inputField.value = '';
-                inputField.focus();
+                alert('รหัสผ่านไม่ถูกต้อง หรือลืมเปลี่ยนภาษาครับ');
+                document.getElementById('pw').value = '';
             }
         }
 
-        // เพิ่ม Event Listener ให้กดปุ่ม Enter แล้ว Login ได้เลย
+        // เสริม: กด Enter ที่คีย์บอร์ดแล้วล็อกอินได้เลย
         document.getElementById('pw').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                handleLogin();
+                login();
             }
         });
     </script>
-
 </body>
 </html>
