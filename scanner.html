@@ -89,7 +89,6 @@
             <a href="scanner-mo.html" class="nav-item">MOBILE</a>
             <a href="admin.html" class="nav-item">ADMIN</a>
             <a href="debug-data.html" class="nav-item">DEBUG-DATA</a>   
-            <a href="sync-bubble.html" class="nav-item">SYNC CLOUD</a>
             <a href="view-database.html" class="nav-item">VIEW</a>
             <a href="history.html" class="nav-item">HISTORY</a>
         </div>
@@ -140,7 +139,7 @@
             const code = this.value.trim().toUpperCase();
             
             // --- แก้ไข: กำหนดความยาวบาร์โค้ดขั้นต่ำ ---
-            const minLength = 4; // ปรับตัวเลขนี้ตามความยาวบาร์โค้ดจริง
+            const minLength = 5; // ปรับตัวเลขนี้ตามความยาวบาร์โค้ดจริง
             if (code.length < minLength) return; 
             // ------------------------------------
 
@@ -237,3 +236,4 @@
 </body>
 
 </html>
+
