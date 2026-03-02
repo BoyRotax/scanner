@@ -117,9 +117,6 @@
     </div>
 
     <script>
-if (sessionStorage.getItem('isLoggedIn') !== 'true') {
-    window.location.href = 'index.html';
-}
         // 1. ระบบนาฬิกา
         function updateClock() {
             const now = new Date();
@@ -238,4 +235,5 @@ if (sessionStorage.getItem('isLoggedIn') !== 'true') {
         setInterval(() => { if(!isLock) scanInput.focus(); }, 1000);
     </script>
 </body>
+
 </html>
