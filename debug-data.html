@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Data - Rotax Asia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; background: #0a0a0a; color: #0f0; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        
+        .card { background: #111; border: 1px solid #333; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
+        .label { color: #888; font-size: 0.8rem; margin-bottom: 5px; }
+        
+        pre { font-family: 'Fira Code', monospace; background: #000; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; border: 1px solid #222; max-height: 400px; }
+        
+        .btn { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; margin-right: 10px; text-decoration: none; display: inline-block; }
+        .btn-refresh { background: #007bff; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+        .btn-back { background: #444; color: white; }
+        
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-item { background: #1a1a1a; padding: 15px; border-radius: 10px; border-left: 4px solid #0f0; }
+        .stat-val { font-size: 1.5rem; font-weight: bold; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🛠️ SYSTEM DEBUGGER</h1>
+        <div>
+            <button class="btn btn-refresh" onclick="location.reload()">🔄 REFRESH</button>
+            <a href="scanner.html" class="btn btn-back">BACK</a>
+        </div>
+    </div>
+
+    <div class="stat-grid">
+        <div class="stat-item">
+            <div class="label">DATABASE (BARCODES)</div>
+            <div id="dbCount" class="stat-val">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="label">SCAN LOGS</div>
+            <div id="logCount" class="stat-val">0</div>
+        </div>
+        <div class="stat-item">
+            <div class="label">STORAGE USAGE</div>
+            <div id="storageSize" class="stat-val">0 KB</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="label">DATABASE RAW JSON (rotax_search_index)</div>
+        <pre id="dbRaw">Loading...</pre>
+        <button class="btn btn-clear" onclick="clearDB()">🗑️ CLEAR DATABASE</button>
+    </div>
+
+    <div class="card">
+        <div class="label">SCAN LOGS RAW JSON (scan_logs)</div>
+        <pre id="logsRaw">Loading...</pre>
+        <button class="btn btn-clear" onclick="clearLogs()">🗑️ CLEAR LOGS</button>
+    </div>
+</div>
+
+<script>
+    function loadDebugData() {
+        // 1. ดึงข้อมูล Database
+        const dbData = localStorage.getItem('rotax_search_index');
+        const dbParsed = JSON.parse(dbData) || {};
+        document.getElementById('dbCount').innerText = Object.keys(dbParsed).length;
+        document.getElementById('dbRaw').innerText = dbData ? JSON.stringify(dbParsed, null, 4) : 'Empty / Not Found';
+
+        // 2. ดึงข้อมูล Scan Logs
+        const logData = localStorage.getItem('scan_logs');
+        const logParsed = JSON.parse(logData) || [];
+        document.getElementById('logCount').innerText = logParsed.length;
+        document.getElementById('logsRaw').innerText = logData ? JSON.stringify(logParsed, null, 4) : 'Empty / Not Found';
+
+        // 3. คำนวณขนาด Storage
+        const totalSize = ((encodeURI(dbData).length + encodeURI(logData).length) / 1024).toFixed(2);
+        document.getElementById('storageSize').innerText = totalSize + ' KB';
+    }
+
+    function clearDB() {
+        if(confirm('‼️ คุณต้องการลบฐานข้อมูลทั้งหมด (Barcode Index) ใช่หรือไม่?')) {
+            localStorage.removeItem('rotax_search_index');
+            location.reload();
+        }
+    }
+
+    function clearLogs() {
+        if(confirm('‼️ คุณต้องการลบประวัติการสแกนทั้งหมด ใช่หรือไม่?')) {
+            localStorage.removeItem('scan_logs');
+            location.reload();
+        }
+    }
+
+    // เริ่มทำงานเมื่อโหลดหน้า
+    try {
+        loadDebugData();
+    } catch (e) {
+        document.body.innerHTML += `<div style="color:red; padding:20px;">Error: ${e.message}</div>`;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Scanner - Moments Media</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --yellow: #FFD700; --bg: #000; --red: #e30613; --green: #4ade80; --dark-card: #111; }
+        body { font-family: 'Kanit', sans-serif; background: var(--bg); color: white; margin: 0; padding: 0; overflow: hidden; }
+
+        /* 1. NAVBAR (Responsive) */
+        .navbar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 15px; background: #0a0a0a; border-bottom: 2px solid #222;
+            position: relative; z-index: 10001;
+        }
+        .nav-brand-group { display: flex; flex-direction: column; }
+        .nav-brand { font-weight: 900; color: var(--red); font-size: 1.2rem; line-height: 1; }
+        .nav-company { font-size: 0.6rem; color: #555; font-weight: bold; margin-top: 3px; }
+
+        /* Menu for Mobile (Hamburger) */
+        .menu-toggle { display: none; background: none; border: 1px solid #333; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .nav-menu { display: flex; gap: 8px; }
+        .nav-item { text-decoration: none; color: #777; font-size: 0.75rem; border: 1px solid #333; padding: 6px 12px; border-radius: 6px; font-weight: bold; white-space: nowrap; }
+        .nav-item.active { border-color: var(--yellow); color: var(--yellow); background: rgba(255,215,0,0.05); }
+
+        /* 2. STATUS BAR */
+        .status-bar { display: flex; justify-content: flex-end; padding: 5px 15px; background: #050505; border-bottom: 1px solid #1a1a1a; font-size: 0.75rem; }
+        #txtTime { color: var(--yellow); font-weight: bold; margin-left: 10px; }
+
+        /* 3. MAIN SCAN AREA */
+        .scan-container { padding: 20px 15px; text-align: center; }
+        #scanInput { 
+            width: 100%; max-width: 500px; padding: 15px; font-size: 1.5rem; 
+            border-radius: 12px; border: 3px solid #333; background: #000; color: #0f0; 
+            text-align: center; font-weight: 900; outline: none; transition: 0.3s;
+        }
+        #scanInput:focus { border-color: var(--yellow); box-shadow: 0 0 25px rgba(255, 215, 0, 0.15); }
+        /* 4. RECENT SCANS (Adjusted for Mobile) */
+        .recent-box { padding: 0 15px; max-width: 600px; margin: auto; }
+        .recent-label { color: #444; font-size: 0.7rem; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; }
+        .recent-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: var(--dark-card); padding: 10px 12px; border-radius: 8px; 
+            margin-bottom: 6px; border-left: 4px solid var(--green);
+        }
+        .recent-item.err { border-left-color: var(--red); opacity: 0.8; }
+        .recent-info b { color: var(--yellow); font-size: 0.9rem; }
+        .recent-info small { color: #666; font-size: 0.7rem; display: block; }
+        .recent-time-box { text-align: right; font-family: monospace; font-size: 0.75rem; color: #444; }
+
+        /* 5. FULL SCREEN RESULT (The Big Show) */
+        #resultBox { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 10000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
+        }
+        .found { background: var(--yellow) !important; color: #000 !important; display: flex !important; }
+        .not-found { background: var(--red) !important; color: #fff !important; display: flex !important; }
+        
+        #resClass { background: rgba(0,0,0,0.85); color: white; padding: 5px 15px; border-radius: 6px; font-size: 1rem; margin-bottom: 10px; }
+        .kart-num { font-size: 20vw; font-weight: 600; line-height: 0.8; margin: 10px 0; }
+        .driver-name { font-size: 8vw; font-weight: 600; text-transform: uppercase; text-align: center; width: 100%; overflow: hidden; }
+        #resType { margin-top: 15px; font-size: 1rem; font-weight: bold; border: 2px solid currentColor; padding: 4px 12px; border-radius: 8px; }
+
+        /* MOBILE RESPONSIVE ADAPTATION */
+        @media (max-width: 768px) {
+            .nav-menu { 
+                display: none; position: absolute; top: 100%; left: 0; width: 100%; 
+                background: #0a0a0a; flex-direction: column; padding: 10px; border-bottom: 2px solid #222;
+            }
+            .nav-menu.active { display: flex; }
+            .menu-toggle { display: block; }
+            .kart-num { font-size: 20vw; } /* ใหญ่เต็มจอมือถือ */
+            .driver-name { font-size: 10vw; }
+            #scanInput { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand-group">
+            <div class="nav-brand">ROTAX ASIA</div>
+            <div class="nav-company">MOMENTS MEDIA ORGANIZING</div>
+        </div>
+        <button class="menu-toggle" onclick="toggleMenu()">MENU ☰</button>
+        <div class="nav-menu" id="mobileMenu">
+            <a href="scanner-mo.html" class="nav-item active">MOBILE</a>
+            <a href="scanner.html" class="nav-item">SCANNER</a>
+            <a href="admin.html" class="nav-item">ADMIN</a>
+            <a href="debug-data.html" class="nav-item">DEBUG-DATA</a>   
+            <a href="sync-bubble.html" class="nav-item">SYNC CLOUD</a>
+            <a href="view-database.html" class="nav-item">VIEW</a>
+            <a href="history.html" class="nav-item">HISTORY</a>
+        </div>
+    </nav>
+
+    <div class="status-bar">
+        <span id="txtDate">-- --- ----</span>
+        <span id="txtTime">00:00:00</span>
+    </div>
+
+    <div class="scan-container">
+        <input type="text" id="scanInput" placeholder="READY TO SCAN" autofocus autocomplete="off">
+    </div>
+
+    <div class="recent-box">
+        <div class="recent-label">RECENT 8 SCANS</div>
+        <div id="recentList"></div>
+    </div>
+
+    <div id="resultBox">
+        <div id="resClass">CLASS</div>
+        <div class="kart-num" id="resKart">00</div>
+        <div class="driver-name" id="resDriver">DRIVER NAME</div>
+        <div id="resType">TYPE: --</div>
+    </div>
+
+    <script>
+        // ระบบนาฬิกา
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('txtDate').innerText = now.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}).toUpperCase();
+            document.getElementById('txtTime').innerText = now.toLocaleTimeString('en-GB');
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        // เปิด/ปิดเมนูบนมือถือ
+        function toggleMenu() {
+            document.getElementById('mobileMenu').classList.toggle('active');
+        }
+
+        const scanInput = document.getElementById('scanInput');
+        const resBox = document.getElementById('resultBox');
+        let isLock = false;
+
+        renderRecent();
+
+        scanInput.addEventListener('input', function() {
+            if (isLock) return;
+            const code = this.value.trim().toUpperCase();
+            if (code.length < 1) return;
+
+            isLock = true;
+            const db = JSON.parse(localStorage.getItem('rotax_search_index')) || {};
+            const match = db[code];
+            const now = new Date();
+            const logDate = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            const logTime = now.toLocaleTimeString('en-GB');
+
+            resBox.style.display = 'flex';
+
+            if (match) {
+                resBox.className = 'found';
+                document.getElementById('resKart').innerText = match.kartNo;
+                document.getElementById('resDriver').innerText = match.driver;
+                document.getElementById('resClass').innerText = match.class;
+                document.getElementById('resType').innerText = `${match.type}: ${code}`;
+                addLog(match.kartNo, match.driver, code, match.type, "OK", logDate, logTime);
+                playBeep(850, 0.15);
+            } else {
+                resBox.className = 'not-found';
+                document.getElementById('resKart').innerText = "??";
+                document.getElementById('resDriver').innerText = "NOT FOUND";
+                document.getElementById('resClass').innerText = "UNKNOWN";
+                document.getElementById('resType').innerText = `ERR: ${code}`;
+                addLog("???", "Unknown", code, "ERROR", "ERR", logDate, logTime);
+                playBeep(250, 0.4);
+            }
+
+            setTimeout(() => {
+                resBox.style.display = 'none';
+                resBox.className = '';
+                scanInput.value = '';
+                isLock = false;
+                scanInput.focus();
+                renderRecent();
+            }, 2000);
+        });
+
+        function addLog(kart, name, code, type, status, date, time) {
+            let logs = JSON.parse(localStorage.getItem('scan_logs')) || [];
+            logs.unshift({ kart, name, code, type, status, date, time });
+            if (logs.length > 50) logs.pop();
+            localStorage.setItem('scan_logs', JSON.stringify(logs));
+        }
+
+        function renderRecent() {
+            const logs = JSON.parse(localStorage.getItem('scan_logs')) || [];
+            const container = document.getElementById('recentList');
+            container.innerHTML = logs.length === 0 ? "<div style='color:#333; text-align:center;'>---</div>" : "";
+            logs.slice(0, 8).forEach(log => {
+                const item = document.createElement('div');
+                item.className = `recent-item ${log.status === 'ERR' ? 'err' : ''}`;
+                item.innerHTML = `
+                    <div class="recent-info">
+                        <b>#${log.kart} - ${log.name}</b>
+                        <small>${log.type}: ${log.code}</small>
+                    </div>
+                    <div class="recent-time-box">
+                        <div>${log.date}</div>
+                        <div style="color:var(--yellow)">${log.time}</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function playBeep(freq, dur) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'square'; osc.frequency.value = freq;
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start();
+                g.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + dur);
+                osc.stop(ctx.currentTime + dur);
+            } catch(e) {}
+        }
+
+        // ป้องกันคีย์บอร์ดเด้งขึ้นมาบังจอ (สำหรับกรณีใช้ Bluetooth Scanner)
+        // scanInput.readOnly = true; // ถ้าต้องการบล็อกคีย์บอร์ดมือถือถาวรให้เปิดบรรทัดนี้
+        document.addEventListener('click', () => scanInput.focus());
+        setInterval(() => { if(!isLock) scanInput.focus(); }, 1000);
+    </script>
+</body>
+</html>
